@@ -1,0 +1,92 @@
+name: Multi-Step Condizionale
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test-condizioni:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Step 1 - Operazione Base
+        id: step1
+        run: |
+          echo "✅ Esecuzione step base"
+          echo "Branch corrente: ${{ github.ref }}"
+          echo "Evento trigger: ${{ github.event_name }}"
+          echo "step1_status=success" >> $GITHUB_OUTPUT
+      
+      - name: Step 2 - Esecuzione con possibile fallimento
+        id: step2
+        continue-on-error: true
+        run: |
+          echo "🔄 Step che potrebbe fallire..."
+          # Simula fallimento su branch develop
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "❌ Simulazione fallimento su branch develop"
+            exit 1
+          fi
+          echo "✅ Step completato con successo"
+      
+      - name: Step 3 - Solo se il precedente ha successo
+        if: success()
+        run: |
+          echo "✨ Questo step viene eseguito solo se tutti gli step precedenti hanno avuto successo"
+          echo "Branch: ${{ github.ref }}"
+      
+      - name: Step 4 - Solo se c'è un fallimento
+        if: failure()
+        run: |
+          echo "⚠️ Questo step viene eseguito solo se almeno uno step precedente è fallito"
+          echo "Rilevato fallimento, esecuzione recovery actions..."
+      
+      - name: Step 5 - Eseguito sempre (cleanup)
+        if: always()
+        run: |
+          echo "🔧 Questo step viene SEMPRE eseguito, indipendentemente dal risultato"
+          echo "Operazioni di cleanup e logging..."
+          echo "Status job: ${{ job.status }}"
+      
+      - name: Step 6 - Solo su branch main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "🎯 Questo step viene eseguito SOLO sul branch main"
+          echo "Deploy su produzione o operazioni critiche..."
+      
+      - name: Step 7 - Solo su branch develop
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "🧪 Questo step viene eseguito SOLO sul branch develop"
+          echo "Deploy su staging o test avanzati..."
+      
+      - name: Step 8 - Solo su branch feature
+        if: contains(github.ref, 'feature/')
+        run: |
+          echo "🚀 Questo step viene eseguito SOLO sui branch feature/*"
+          echo "Test specifici per nuove funzionalità..."
+      
+      - name: Step 9 - Solo per Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📋 Questo step viene eseguito SOLO per Pull Request"
+          echo "Validazione PR e code review automatico..."
+      
+      - name: Step 10 - Solo per esecuzione manuale
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "👆 Questo step viene eseguito SOLO per esecuzione manuale"
+          echo "Operazioni amministrative o debug..."
+      
+      - name: Step 11 - Riepilogo finale
+        if: always()
+        run: |
+          echo "📊 === RIEPILOGO ESECUZIONE ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Evento: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Job Status: ${{ job.status }}"
