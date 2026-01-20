@@ -1,0 +1,43 @@
+name: Hello World Personalizzato
+run-name: ${{ github.actor }} sta testando GitHub Actions 🚀
+on: [push]
+
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Necessario per git diff
+      
+      - name: Informazioni Repository
+        run: |
+          echo "📦 Repository: ${{ github.repository }}"
+          echo "🔗 URL Repository: ${{ github.repositoryUrl }}"
+      
+      - name: Informazioni Commit
+        run: |
+          echo "🔑 SHA Commit: ${{ github.sha }}"
+          echo "💬 Messaggio Commit: ${{ github.event.head_commit.message }}"
+          echo "👤 Autore Commit: ${{ github.event.head_commit.author.name }}"
+      
+      - name: Informazioni Workflow
+        run: |
+          echo "⚙️ Nome Workflow: ${{ github.workflow }}"
+          echo "🆔 ID Esecuzione: ${{ github.run_id }}"
+          echo "👨‍💻 Triggerato da: ${{ github.actor }}"
+      
+      - name: Data e Ora Esecuzione
+        run: |
+          echo "🕐 Data e Ora (UTC): $(date -u)"
+          echo "🕐 Data e Ora (Locale): $(date)"
+          echo "⏰ Timestamp: $(date +%s)"
+      
+      - name: File Modificati nell'Ultimo Commit
+        run: |
+          echo "📝 File modificati nell'ultimo commit:"
+          git diff --name-only HEAD^ HEAD || echo "Nessun file modificato trovato (potrebbe essere il primo commit)"
+          echo ""
+          echo "📊 Statistiche delle modifiche:"
+          git diff --stat HEAD^ HEAD || echo "Nessuna statistica disponibile"
